@@ -1,0 +1,80 @@
+<!-- 17.07.2018. Необходимо разработать простое веб-приложение для создания\хранения\редактирования контактной информации.
+
+Приложение должно  включать в себя все компоненты, требующиеся для его работы: БД для хранения контактов, frontend для вывода 
+информации пользователю и backend для взаимодействия пользователя с БД
+
+Необходимые функции программы:
+1) Внесение нового контакта;
+2) Вывод на экран всех ранее внесенных контактов;
+3) Поиск контакта (по имени);
+4) Редактирование контакта;
+5) Удаление контакта;
+6) Взаимодействие с пользователем должно происходить посредством ввода данных на некой web-странице в браузере.
+
+Каждая запись должна содержать имя контакта, телефон и электронный адрес человека или организации, информация о которых 
+вносится в программу.
+
+Решение требуется предоставить в виде проекта под git, состоящего из:
+1) Набора скриптов для backend и frontend;
+2) SQL файл, создающий тестовую БД;
+3) Минимальный набор инструкций для развертывания окружения, необходимого для работы приложения. -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Contact list</title>
+    <link href="https://fonts.googleapis.com/css?family=Poppins" rel="stylesheet">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" 
+        integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
+</head>
+
+<body>
+    <div class="base-container">
+        <!-- Contact Search and Add -->
+        <div id="headerContainer">
+            <input id="searchContact" type="search" autocomplete="off" placeholder="Поиск">
+            <button id="addContactBtn">+ контакт</button>
+        </div>      
+        <!-- // Contact Search and Add -->
+    
+        <!-- Add Contact form -->
+        <div id="addContFormContainer" class="focused-form hide">
+            <form id="addContForm" class="editcont-form" autocomplete="off" method="post">
+                <p class="form-header">Добавление нового контакта</p>
+                <input name="name" class='contform-input' type="text" placeholder="Имя/Название">
+                <input name="phone" class='contform-input' type="tel" placeholder="Телефон">
+                <input name="email" class='email-input contform-input' type="email" placeholder="Эл. почта">
+                <p class="email-pat input-pat">Пример эл. почты: name@example.org</p>
+                <p class="form-warning hide"></p>
+
+                <div class="form-btns">
+                    <button class="saveBtn" type="submit" formnovalidate disabled>Сохранить</button>
+                    <button class="cancelBtn" type="button">Отмена</button>
+                </div>
+            </form>
+        </div>
+        <!-- // Add Contact form -->
+
+        <!-- Contact search results -->
+        <div id="searchResultContainer" class="hide">
+            <span id="searchResultText">Поиск не дал результатов</span>
+            <span id="searchResultBreak">Сбросить</span>
+        </div>
+        <!-- // Contact search results -->
+
+        <!-- Contacts list -->
+        <div id="contactList" class="hide">
+            <!-- loadContactList(); -->
+        </div> 
+
+    </div>
+
+    <script src="libs/jquery/jquery-3.3.1.min.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
