@@ -3,7 +3,7 @@ $(document).ready(function(){
     // Глобальные переменные
     var bWarned = false;
     var bDelWarned = false;
-    var isEditForm = false;
+    var canEdit = false;
     var ccHeight;
     // var contactsNames = {};
     var contacts = {};
@@ -29,9 +29,9 @@ $(document).ready(function(){
                     var contactСard = $('<div class="contact-card"></div>'); // Создаем карточку контакта
                     // contactСard.attr('id', contacts[i].id); // id карточки контакта = id записи в БД
                     var contactData = $('<div class="contact-data"></div>'); 
-                    var name = $('<div class="cc-name"></div>'); //.text('XXXXX');
-                    var phone = $('<div class="cc-phone cc-data"></div>');
-                    var email = $('<div class="cc-email cc-data"></div>');
+                    var name = $('<div class="cc-name cc-name-place"></div>'); //.text('XXXXX');
+                    var phone = $('<div class="cc-phone cc-data cc-data-place"></div>');
+                    var email = $('<div class="cc-email cc-data cc-data-place"></div>');
                     var iEdit = $('<div class="edit-icon"><i class="far fa-edit"></i></div>'); 
                     iEdit.hide();
 
@@ -50,9 +50,9 @@ $(document).ready(function(){
                 if(startup)
                     for(i = 0; i < contactsNum; i++){
                         var contactСard = contactList.children().eq(i);
-                        contactСard.find('.cc-name').text('XXXXXXX');
-                        contactСard.find('.cc-phone').text('XXXXXXX');
-                        contactСard.find('.cc-email').text('XXXXXXX');
+                        contactСard.find('.cc-name').text('x');
+                        contactСard.find('.cc-phone').text('x');
+                        contactСard.find('.cc-email').text('x');
                     }
 
                 loadContactList(startup);
@@ -86,12 +86,17 @@ $(document).ready(function(){
                     var contactСard = contactList.children().eq(i);
                     contactСard.attr('id', contacts[i].id); // id карточки контакта = id записи в БД
                     contactСard.find('.cc-name').text(contacts[i].name);
+                    contactСard.find('.cc-name').removeClass('cc-name-place');
                     contactСard.find('.cc-phone').text(contacts[i].phone);
+                    contactСard.find('.cc-phone').removeClass('cc-data-place');
                     contactСard.find('.cc-email').text(contacts[i].email);
+                    contactСard.find('.cc-email').removeClass('cc-data-place');
                     // contactСard.show();
                     // contactsNames[contacts[i].id] = contacts[i].name;
                 }
                 
+                setEditForm(false);
+
                 if(startup)
                     $('#searchContact').focus();
             } 
@@ -103,7 +108,7 @@ $(document).ready(function(){
 
     // Редактирование контакта - иконка
     $('#contactList').on('mouseenter', '.contact-card', function(){  
-        if(!isEditForm)
+        if(canEdit)
             $(this).children('.edit-icon').show();
     });
 
@@ -159,7 +164,7 @@ $(document).ready(function(){
 
     // Нельзя создавать формы редактирования пока открыта хотя бы одна
     var setEditForm = function(is){
-        isEditForm = is;
+        canEdit = !is;
         $('#addContactBtn').prop("disabled", is);
         if(is) bWarned = bDelWarned = false;
     };
