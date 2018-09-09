@@ -36,17 +36,17 @@ body{
 }
 #searchResultContainer{
     margin-bottom: 20px;
-}
-#searchResultText{
     font-size: 0.9em;
     font-style: italic;
     padding: 10px;
+    display: none;
 }
 #searchResultBreak{
-    font-size: 0.9em;
-    font-style: italic;
+    /* font-size: 0.9em;
+    font-style: italic; */
     border-bottom: 1px dashed;
     cursor: pointer;
+    padding-left: 3px;
 }
 
 #addContFormContainer{
@@ -138,3 +138,6 @@ body{
 .focused-form {
     border: 1px solid #000;
 }
+/* #loadImg{
+    width: 100%;
+} */

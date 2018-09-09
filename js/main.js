@@ -5,34 +5,33 @@ $(document).ready(function(){
     var bDelWarned = false;
     var isEditForm = false;
     var ccHeight;
-    var contactsNames = {};
+    // var contactsNames = {};
+    var contacts = {};
 
-    // Загружаем список контактов
-    var loadContactList = function(){
-
+    // Загружаем и рисуем список контактов
+    var drawContactList = function(startup=false){
+        
+        // Рисуем пустые карточки по количеству контактов
         $.ajax({
 			type: "GET",
-			url: "getContacts.php",
-			type: "json",
+			url: "getContactsCount.php",
 
-			success: function(data){
-                var contacts = jQuery.parseJSON(data);
-                // console.log(contacts);
+			success: function(count){
+                console.log(count);
+
+                var contactsNum = count;
                 var contactList = $('#contactList');
-                var contactsNum = 0;
-                for(item in contacts) contactsNum++;
                 var contactСardsNum = contactList.children().length;
                 var addCards = contactsNum - contactСardsNum;
                 // console.log(addCards+' = '+contactsNum+' - '+contactСardsNum); 
-
-                // for(i in contacts){
+                
                 for(i = 0; i < addCards; i++){
                     var contactСard = $('<div class="contact-card"></div>'); // Создаем карточку контакта
                     // contactСard.attr('id', contacts[i].id); // id карточки контакта = id записи в БД
                     var contactData = $('<div class="contact-data"></div>'); 
-                    var name = $('<div class="cc-name"></div>'); //.text(contacts[i].name);
-                    var phone = $('<div class="cc-phone cc-data"></div>'); //.text(contacts[i].phone);
-                    var email = $('<div class="cc-email cc-data"></div>'); //.text(contacts[i].email);
+                    var name = $('<div class="cc-name"></div>'); //.text('XXXXX');
+                    var phone = $('<div class="cc-phone cc-data"></div>');
+                    var email = $('<div class="cc-email cc-data"></div>');
                     var iEdit = $('<div class="edit-icon"><i class="far fa-edit"></i></div>'); 
                     iEdit.hide();
 
@@ -45,25 +44,62 @@ $(document).ready(function(){
                         contactList.children().last().remove();
                     }
 
+                contactList.show();
+
+                // При стартовой загрузке рисуем плейсхолдеры
+                if(startup)
+                    for(i = 0; i < contactsNum; i++){
+                        var contactСard = contactList.children().eq(i);
+                        contactСard.find('.cc-name').text('XXXXXXX');
+                        contactСard.find('.cc-phone').text('XXXXXXX');
+                        contactСard.find('.cc-email').text('XXXXXXX');
+                    }
+
+                loadContactList(startup);
+            }
+        });
+    }
+    
+    // Загружаем сами контакты, заполняем ими карточки
+    var loadContactList = function(startup=false){
+        $.ajax({
+            type: "GET",
+            url: "getContacts.php",
+            type: "json",
+
+            success: function(data){
+                // var contacts_l = jQuery.parseJSON(data);
+                contacts = jQuery.parseJSON(data);
+                console.log(contacts);
+
+                // for(i = 0; i < contactsNum; i++){
+                //     contacts[i].id = contacts_l[i].id;
+                //     contacts[i].name = contacts_l[i].name;
+                //     contacts[i].phone = contacts_l[i].phone;
+                //     contacts[i].email = contacts_l[i].email;
+                // }
+                var contactList = $('#contactList');
+                var contactsNum = 0;
+                for(item in contacts) contactsNum++;
+
                 for(i = 0; i < contactsNum; i++){
                     var contactСard = contactList.children().eq(i);
                     contactСard.attr('id', contacts[i].id); // id карточки контакта = id записи в БД
                     contactСard.find('.cc-name').text(contacts[i].name);
                     contactСard.find('.cc-phone').text(contacts[i].phone);
                     contactСard.find('.cc-email').text(contacts[i].email);
-                    contactСard.show();
-                    contactsNames[contacts[i].id] = contacts[i].name;
+                    // contactСard.show();
+                    // contactsNames[contacts[i].id] = contacts[i].name;
                 }
-                // console.log(contactsNames);
-                  
-                contactList.show();
-                $('#searchContact').focus();
+                
+                if(startup)
+                    $('#searchContact').focus();
             } 
         });
     }
 
     // При загрузке страницы:
-    loadContactList();
+    drawContactList(true);
 
     // Редактирование контакта - иконка
     $('#contactList').on('mouseenter', '.contact-card', function(){  
@@ -221,9 +257,18 @@ $(document).ready(function(){
 			success: function(html){
                 // console.log(html);
                 editModeOff(contactCard);
-                // console.log('delete contactsNames['+id+'] = '+contactsNames[id]);
-                delete contactsNames[id];
-                contactCard.slideUp(400, updateContactList);
+                console.log(contacts);
+                console.log('delete contacts.id = '+id);
+                for(var i in contacts)
+                    if(contacts[i].id == id){
+                        contacts.splice(i, 1);
+                        break;
+                }
+                console.log(contacts);
+                contactCard.slideUp(400, 
+                    // ()=>{$('#contactList').children('.contact-card[id=id]').remove()});
+                    () => { contactCard.remove(); searchResultDecr() }); 
+                    //updateContactList);
 			}
         });
     });
@@ -243,7 +288,18 @@ $(document).ready(function(){
         //sendData = 'name=' + name + '&phone=' + phone + '&email=' + email;
         var id = contactCard.attr('id');
         sendData += '&id=' + id;
-        // console.log('sendData: '+sendData);
+
+        // optimistic UI:
+        var editForm = $(this);
+        for(var i in contacts)
+            if( contacts[i].id == id ){
+                contacts[i].name = editForm.children('input[name="name"]').val().trim();
+                contacts[i].phone = editForm.children('input[name="phone"]').val().trim();
+                contacts[i].email = editForm.children('input[name="email"]').val().trim();
+                break;
+            }
+        console.log('edit, contacts update');
+        console.log(contacts);
 
         $.ajax({
 			type: "POST",
@@ -311,7 +367,7 @@ $(document).ready(function(){
 
 			success: function(html){
 				// console.log(html);
-				updateContactList();
+				drawContactList();
 			}
         });
 
@@ -383,7 +439,7 @@ $(document).ready(function(){
     // Обновляем список контактов
     var updateContactList = function(){
         
-        searchResultBreak();
+        //searchResultBreak();
         loadContactList();
     }
 
@@ -395,6 +451,8 @@ $(document).ready(function(){
 
     $('#searchResultBreak').on('click', function(){
         searchResultBreak();
+        $('#searchContact').val('');
+        $('#searchContact').focus();
     });
 
     // Поиск контактов
@@ -425,7 +483,7 @@ $(document).ready(function(){
             if(hide) contactСard.hide();
         }
 
-        $('#searchResultText').text('Найдено записей: '+resultNum);
+        $('#searchResultNum').text(resultNum);
         $('#searchResultContainer').show();
     });
 
@@ -435,16 +493,26 @@ $(document).ready(function(){
         var search = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
         // console.log('search = '+search);
         var regex = new RegExp(search, 'i');
-        for(var id in contactsNames){
-            var name = contactsNames[id];
-            // console.log('name: '+name);
+        for(var i in contacts){
+            var name = contacts[i].name;
+            console.log('name: '+name);
             if(regex.test(name)){
-                resultIDs.push(id);
+                resultIDs.push(contacts[i].id);
                 // console.log(name+' name test ok');
             }
         }
 
         return resultIDs;
+    }
+
+    // Декремент результата поиска (при удалении карточки при активной выдаче)
+    var searchResultDecr = function(){
+        if( $('#searchResultContainer').css('display') != 'none' ){
+            var resultNum = $('#searchResultNum').text();
+            $('#searchResultNum').text(--resultNum);
+            if( resultNum <= 0 )
+                searchResultBreak();
+        }
     }
     
 });
